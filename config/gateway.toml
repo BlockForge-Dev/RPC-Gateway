@@ -1,0 +1,108 @@
+[server]
+bind_addr = "0.0.0.0:8080"
+
+[reliability]
+request_timeout_ms = 2200
+hedge_delay_ms = 125
+max_failover_attempts = 3
+unhealthy_after_failures = 3
+recovery_after_secs = 15
+
+[reliability.adaptive_hedging]
+enabled = true
+min_hedge_width = 1
+max_hedge_width = 4
+rps_window_secs = 30
+medium_rps = 40.0
+high_rps = 120.0
+medium_latency_spread_ms = 75
+high_latency_spread_ms = 175
+max_latency_samples = 180
+
+[reliability.predictive_scoring]
+enabled = true
+target_latency_ms = 120
+max_block_lag = 8
+unknown_block_lag_factor = 0.85
+unknown_rate_limit_headroom = 1.0
+block_lag_poll_interval_secs = 6
+block_lag_method = "getSlot"
+block_lag_params = []
+
+[reliability.shadow_mode]
+enabled = true
+default_warmup_secs = 300
+default_min_observations = 50
+mirror_max_providers = 1
+
+[reliability.coalescing]
+enabled = true
+
+[reliability.consensus_validation]
+enabled = true
+sample_size = 3
+fail_open = false
+
+[reliability.cost_routing]
+enabled = true
+strategy = "balanced"
+
+[reliability.probe]
+enabled = true
+interval_secs = 10
+timeout_ms = 1200
+method = "getHealth"
+params = []
+
+[cache]
+enabled = true
+ttl_secs = 2
+max_capacity = 20000
+cacheable_methods = [
+  "getSlot",
+  "getBlockHeight",
+  "getLatestBlockhash",
+  "getBalance",
+  "getAccountInfo",
+]
+
+[cache.method_ttl_secs]
+getSlot = 1
+getBlockHeight = 2
+getLatestBlockhash = 2
+getBalance = 2
+getAccountInfo = 1
+
+# Optional per-method policy overrides (case-insensitive keys).
+# Useful for custom RPC methods not covered by built-in Solana defaults.
+[method_policy.overrides."customExperimentalMethod"]
+cacheable_by_default = true
+consensus_critical = true
+
+[[providers]]
+name = "provider-a"
+url = "https://your-primary-rpc.example"
+weight = 120
+timeout_ms = 1800
+shadow_mode = false
+cost_per_million_requests = 6.5
+
+[providers.headers]
+Authorization = "Bearer your-token"
+
+[[providers]]
+name = "provider-b"
+url = "https://your-secondary-rpc.example"
+weight = 100
+timeout_ms = 2000
+shadow_mode = false
+cost_per_million_requests = 4.8
+
+[[providers]]
+name = "provider-c"
+url = "https://your-tertiary-rpc.example"
+weight = 90
+shadow_mode = true
+shadow_warmup_secs = 600
+shadow_min_observations = 80
+cost_per_million_requests = 3.2
