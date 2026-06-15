@@ -15,7 +15,21 @@ Rust HTTP gateway that forwards JSON-RPC calls to multiple upstream providers wi
 - Provider health tracking and simple circuit-breaker behavior
 - Active background health probes
 
-The default profile is now Solana JSON-RPC (the gateway core is still chain-agnostic).
+The default profile is Solana JSON-RPC. The gateway core is still chain-agnostic and is intended to support a broader blockchain reliability platform.
+
+## Portfolio Role
+
+This repo is the RPC reliability layer in the BlockForge infrastructure portfolio.
+
+It is meant to prove backend infrastructure skills around:
+
+- resilient upstream provider routing
+- latency-aware and cost-aware dispatch
+- consensus-sensitive read validation
+- cache policy for chain RPC methods
+- operational health and runtime telemetry
+
+In the broader system story, this gateway supports execution platforms such as Azums by making provider failure, latency variance, and read disagreement explicit instead of hidden inside one RPC URL.
 
 ## Endpoints
 
@@ -25,7 +39,7 @@ The default profile is now Solana JSON-RPC (the gateway core is still chain-agno
 
 ## Quick Start
 
-1. Update [config/gateway.toml](/c:/Users/HP/RPC-Gateway/config/gateway.toml) with real provider URLs and auth.
+1. Update [`config/gateway.toml`](config/gateway.toml) with real provider URLs and auth.
 2. Run:
 
 ```bash
@@ -35,9 +49,9 @@ cargo run
 3. Send a request:
 
 ```bash
-curl -sS http://localhost:8080/rpc ^
-  -H "content-type: application/json" ^
-  -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getSlot\",\"params\":[]}"
+curl -sS http://localhost:8080/rpc \
+  -H "content-type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"getSlot","params":[]}'
 ```
 
 ## Behavior Notes
@@ -149,7 +163,7 @@ Main knobs:
 
 ## Solana Policy Table
 
-Built-in classifications in [src/gateway/method_policy.rs](/c:/Users/HP/RPC-Gateway/src/gateway/method_policy.rs):
+Built-in classifications in [`src/gateway/method_policy.rs`](src/gateway/method_policy.rs):
 
 - Cacheable + consensus-critical examples: `getBalance`, `getAccountInfo`, `getProgramAccounts`, `getLatestBlockhash`, `getBlock`, `getTransaction`
 - Cacheable + non-critical examples: `getSlot`, `getBlockHeight`, `getHealth`, `getVersion`
@@ -165,4 +179,4 @@ consensus_critical = true
 
 ## Architecture
 
-System design and module responsibilities are documented in [ARCHITECTURE.md](/c:/Users/HP/RPC-Gateway/ARCHITECTURE.md).
+System design and module responsibilities are documented in [`ARCHITECTURE.md`](ARCHITECTURE.md).
